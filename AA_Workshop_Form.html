@@ -851,8 +851,8 @@ async function submitForm(formId, btnId, framework, extraData) {
     chiNhanh: user.chinhanh || '',
     hoSo: extraData.hoSo || '',
     ngay: extraData.ngay || '',
-    ketLuan: rawData.ketLuan || rawData.ketluan || rawData[framework.toLowerCase()+'_ketLuan'] || '',
-    ghiChu: rawData.ghiChu || rawData.ghichu || rawData[framework.toLowerCase()+'_ghiChu'] || ''
+    ketLuan: rawData.ketLuan || rawData.ketluan || rawData[framework.toLowerCase()+'_ketLuan'] || rawData[framework.toLowerCase()+'_kl'] || '',
+    ghiChu: rawData.ghiChu || rawData.ghichu || rawData[framework.toLowerCase()+'_ghiChu'] || rawData[framework.toLowerCase()+'_ghichu'] || ''
   };
 
   try {

@@ -322,7 +322,7 @@ function renderKL(total) {
     const n = fRows.length;
     html += `<div class="kl-card"><div class="kl-title">${cfg.label}</div>`;
     cfg.options.forEach(opt => {
-      const cnt = fRows.filter(r => r[cfg.field] === opt.val).length;
+      const cnt = fRows.filter(r => (r[cfg.field] || r.ketLuan || '') === opt.val).length;
       const pct = n > 0 ? Math.round(cnt/n*100) : 0;
       html += `<div class="kl-row">
         <span class="kl-label">${opt.short}</span>
