@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard · A&A Workshop Q2/2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --B:#003087; --Bm:#1B5BB4; --O:#F47920; --Od:#D4600A; --R:#C0392B;
+  --G2:#16A34A; --T:#1A1A2E; --G:#6B7280;
+  --Gb:#D1D9E6; --Bb:#B8C9E0; --Bl:#EBF0FA; --Bp:#F5F8FF;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Be Vietnam Pro',sans-serif;background:#F0F4FA;color:var(--T);min-height:100vh;}
+
+/* ── HEADER ── */
+.header{background:linear-gradient(135deg,#001D5C,#003087,#1B5BB4);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;}
+.header-left h1{font-size:16pt;font-weight:800;letter-spacing:.3px;color:#fff;}
+.header-left p{color:rgba(255,255,255,.7);font-size:9pt;margin-top:3px;}
+.header-right{display:flex;align-items:center;gap:16px;}
+.refresh-badge{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:7px 16px;font-size:8.5pt;color:rgba(255,255,255,.85);}
+.refresh-badge span{font-weight:700;color:#fff;}
+.total-input-wrap{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:6px 14px;}
+.total-input-wrap label{font-size:8.5pt;color:rgba(255,255,255,.8);}
+.total-input-wrap input{width:44px;background:transparent;border:none;border-bottom:1.5px solid rgba(255,255,255,.5);color:#fff;font-family:inherit;font-size:11pt;font-weight:800;text-align:center;padding:0 2px;}
+.total-input-wrap input:focus{outline:none;border-bottom-color:var(--O);}
+
+/* ── MAIN GRID ── */
+.main{padding:24px 28px;display:grid;gap:20px;}
+
+/* ── CARD ── */
+.card{background:#fff;border:1px solid var(--Gb);border-radius:14px;padding:20px 22px;box-shadow:0 2px 10px rgba(0,48,135,.06);}
+.card-title{font-size:10pt;font-weight:800;color:var(--B);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.card-title .dot{width:8px;height:8px;border-radius:50%;background:var(--O);flex-shrink:0;}
+
+/* ── PROGRESS ROW ── */
+.progress-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.prog-item{background:var(--Bp);border:1px solid var(--Bb);border-radius:10px;padding:14px 16px;}
+.prog-label{font-size:9pt;font-weight:700;color:var(--T);margin-bottom:4px;display:flex;justify-content:space-between;}
+.prog-count{font-size:11pt;font-weight:800;color:var(--B);}
+.prog-bar-bg{height:8px;background:var(--Gb);border-radius:4px;margin-top:8px;overflow:hidden;}
+.prog-bar{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--B),var(--Bm));transition:width .8s ease;}
+
+/* ── TOTAL PROGRESS ── */
+.total-prog{background:linear-gradient(135deg,var(--Bl),var(--Bp));border:1px solid var(--Bb);border-radius:12px;padding:16px 20px;margin-bottom:20px;}
+.total-prog-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;}
+.total-prog-label{font-size:10pt;font-weight:700;color:var(--B);}
+.total-prog-num{font-size:24pt;font-weight:800;color:var(--B);}
+.total-prog-num span{font-size:12pt;color:var(--G);}
+.total-prog-bar-bg{height:12px;background:var(--Gb);border-radius:6px;overflow:hidden;}
+.total-prog-bar{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--O),#FFB347);transition:width .8s ease;}
+
+/* ── CONCLUSION CHARTS ── */
+.kl-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.kl-card{background:var(--Bp);border:1px solid var(--Bb);border-radius:10px;padding:14px 16px;}
+.kl-title{font-size:8.5pt;font-weight:800;color:var(--Od);text-transform:uppercase;letter-spacing:.4px;margin-bottom:12px;}
+.kl-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.kl-row:last-child{margin-bottom:0;}
+.kl-label{font-size:8pt;color:var(--T);flex:1;line-height:1.4;}
+.kl-count{font-size:9pt;font-weight:800;white-space:nowrap;width:28px;text-align:right;color:var(--T);}
+.kl-bar-bg{width:90px;height:6px;background:var(--Gb);border-radius:3px;overflow:hidden;flex-shrink:0;}
+.kl-bar{height:100%;border-radius:3px;transition:width .8s ease;}
+.bar-green{background:#16A34A;}
+.bar-orange{background:var(--O);}
+.bar-red{background:var(--R);}
+.bar-gray{background:var(--G);}
+.bar-blue{background:var(--Bm);}
+
+/* ── HEATMAP ── */
+.heatmap-tbl{width:100%;border-collapse:collapse;font-size:8.5pt;}
+.heatmap-tbl th{padding:7px 10px;text-align:left;color:var(--G);font-weight:600;font-size:7.5pt;border-bottom:1px solid var(--Gb);background:var(--Bl);}
+.heatmap-tbl td{padding:7px 10px;border-bottom:1px solid var(--Gb);}
+.heatmap-tbl tr:last-child td{border-bottom:none;}
+.heatmap-tbl tr:hover td{background:var(--Bp);}
+.hm-q{color:var(--T);line-height:1.5;}
+.hm-pct{font-weight:800;font-size:10pt;white-space:nowrap;}
+.hm-bar-bg{width:120px;height:7px;background:var(--Gb);border-radius:4px;overflow:hidden;}
+.hm-bar{height:100%;border-radius:4px;transition:width .8s ease;}
+.pct-high{color:var(--R);}
+.pct-mid{color:var(--Od);}
+.pct-low{color:#16A34A;}
+
+/* ── PARTICIPANTS TABLE ── */
+.part-tbl{width:100%;border-collapse:collapse;font-size:8.5pt;}
+.part-tbl th{padding:8px 12px;text-align:left;color:var(--G);font-weight:600;font-size:7.5pt;border-bottom:1px solid var(--Gb);background:var(--Bl);}
+.part-tbl td{padding:8px 12px;border-bottom:1px solid var(--Gb);color:var(--T);}
+.part-tbl tr:hover td{background:var(--Bp);}
+.status-dot{display:inline-flex;align-items:center;gap:5px;font-size:8pt;font-weight:600;}
+.dot-done{width:8px;height:8px;border-radius:50%;background:#16A34A;flex-shrink:0;}
+.dot-part{width:8px;height:8px;border-radius:50%;background:var(--O);flex-shrink:0;}
+.dot-none{width:8px;height:8px;border-radius:50%;background:var(--Gb);flex-shrink:0;}
+.f-badge{display:inline-block;padding:2px 7px;border-radius:10px;font-size:7.5pt;font-weight:700;margin:1px;}
+.fb-done{background:#DCFCE7;color:#15803D;border:1px solid #86EFAC;}
+.fb-none{background:var(--Gl);color:var(--G);border:1px solid var(--Gb);}
+
+/* ── FOOTER ── */
+.footer{text-align:center;padding:16px;color:var(--G);font-size:8pt;}
+
+/* ── SETUP NOTE ── */
+.setup-note{background:#FFF8E1;border:1px solid #FFD54F;border-radius:10px;padding:14px 18px;margin-bottom:20px;font-size:8.5pt;color:#7A5200;line-height:1.8;}
+.setup-note strong{color:#5A3800;}
+.setup-note code{background:#FFF0B3;padding:1px 6px;border-radius:3px;font-family:monospace;font-size:8pt;}
+
+/* ── NO DATA ── */
+.no-data{text-align:center;padding:32px;color:var(--G);font-size:9pt;}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <h1>📊 Dashboard · A&A Workshop Q2/2026</h1>
+    <p>Tổng hợp real-time kết quả 4 Framework — cập nhật mỗi 30 giây</p>
+  </div>
+  <div class="header-right">
+    <div class="total-input-wrap">
+      <label>Tổng học viên:</label>
+      <input type="number" id="totalStudents" value="20" min="1" max="100" onchange="renderAll()">
+    </div>
+    <div class="refresh-badge">Cập nhật lần cuối: <span id="lastRefresh">--</span></div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- SETUP NOTE -->
+  <div class="setup-note" id="setupNote">
+    <strong>⚙️ Cấu hình một lần:</strong> Thay <code>const SHEET_API = '...'</code> bằng URL Google Apps Script đã deploy (web app, Anyone can access).
+    Script cần có hàm <code>doGet()</code> trả về JSON danh sách submissions.
+    Sau khi cấu hình xong, xóa thông báo này đi.
+  </div>
+
+  <!-- TIẾN ĐỘ TỔNG -->
+  <div class="card">
+    <div class="card-title"><div class="dot"></div>Tiến độ nộp bài</div>
+    <div class="total-prog">
+      <div class="total-prog-top">
+        <div class="total-prog-label">Tổng số bài đã nộp (tất cả F)</div>
+        <div class="total-prog-num" id="totalSubmitted">0 <span>/ <span id="totalExpected">80</span></span></div>
+      </div>
+      <div class="total-prog-bar-bg"><div class="total-prog-bar" id="totalBar" style="width:0%"></div></div>
+    </div>
+    <div class="progress-grid">
+      <div class="prog-item">
+        <div class="prog-label"><span>F1 – Nhận diện rủi ro ẩn</span><span class="prog-count" id="f1Count">0</span></div>
+        <div class="prog-bar-bg"><div class="prog-bar" id="f1Bar" style="width:0%"></div></div>
+      </div>
+      <div class="prog-item">
+        <div class="prog-label"><span>F2 – Năng lực tài chính</span><span class="prog-count" id="f2Count">0</span></div>
+        <div class="prog-bar-bg"><div class="prog-bar" id="f2Bar" style="width:0%"></div></div>
+      </div>
+      <div class="prog-item">
+        <div class="prog-label"><span>F3 – Khung phán quyết</span><span class="prog-count" id="f3Count">0</span></div>
+        <div class="prog-bar-bg"><div class="prog-bar" id="f3Bar" style="width:0%"></div></div>
+      </div>
+      <div class="prog-item">
+        <div class="prog-label"><span>F4 – Sai lầm điển hình</span><span class="prog-count" id="f4Count">0</span></div>
+        <div class="prog-bar-bg"><div class="prog-bar" id="f4Bar" style="width:0%"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHÂN BỔ KẾT LUẬN -->
+  <div class="card">
+    <div class="card-title"><div class="dot"></div>Phân bổ kết luận — góc nhìn chung của lớp</div>
+    <div class="kl-grid" id="klGrid">
+      <div class="no-data">Chưa có dữ liệu...</div>
+    </div>
+  </div>
+
+  <!-- HEATMAP CÂU HỎI F1 -->
+  <div class="card">
+    <div class="card-title"><div class="dot"></div>Điểm mù của lớp — F1: Câu nào nhiều "Có" nhất?</div>
+    <table class="heatmap-tbl">
+      <thead><tr><th>#</th><th>Câu hỏi</th><th style="width:80px;">% chọn Có</th><th style="width:130px;"></th></tr></thead>
+      <tbody id="heatmapBody">
+        <tr><td colspan="4" class="no-data">Chưa có dữ liệu...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- DANH SÁCH HỌC VIÊN -->
+  <div class="card">
+    <div class="card-title"><div class="dot"></div>Danh sách học viên real-time</div>
+    <table class="part-tbl">
+      <thead>
+        <tr>
+          <th>Họ tên</th>
+          <th>Mã NV</th>
+          <th>Chi nhánh</th>
+          <th>F1</th>
+          <th>F2</th>
+          <th>F3</th>
+          <th>F4</th>
+          <th>Nộp lúc</th>
+        </tr>
+      </thead>
+      <tbody id="partBody">
+        <tr><td colspan="8" class="no-data">Chưa có học viên nộp bài...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<div class="footer">A&A Workshop Q2/2026 · Tài liệu nội bộ · Không phát tán bên ngoài · Team Trainer</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// CẤU HÌNH — thay bằng URL Google Apps Script đã deploy
+// ═══════════════════════════════════════════════════════
+const SHEET_API = 'https://default662ce8bb85db4ba2ba98be222318b8.3e.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/034643d2152e43dd9f9a90fddd888e7a/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=DbboLgGLqozGdtje0pKCeospX26LBnCYUfdTaDHL-zo';
+// ═══════════════════════════════════════════════════════
+
+// F1 questions for heatmap
+const F1_QUESTIONS = [
+  {key:'c1q1', label:'Lịch sử tín dụng có dấu hiệu bất thường trong 12 tháng gần nhất?'},
+  {key:'c1q2', label:'Hồ sơ/giải trình của KH có điểm chưa hợp lý hoặc nhất quán?'},
+  {key:'c2q3', label:'Nguồn trả nợ chính có được xác định rõ và xác minh được?'},
+  {key:'c2q4', label:'Nguồn trả nợ phụ thuộc quá lớn vào một nguồn thu duy nhất?'},
+  {key:'c3q5', label:'Mục đích vay có phù hợp với nhu cầu và khả năng tài chính KH?'},
+  {key:'c3q6', label:'Mục đích sử dụng vốn thực tế có thể khác với đề xuất?'},
+  {key:'c4q7', label:'Khoản vay đang dựa quá nhiều vào giá trị TSBĐ?'},
+  {key:'c5q8', label:'Có yếu tố bên ngoài ảnh hưởng đến KN trả nợ chưa được phản ánh?'},
+];
+
+const KL_CONFIGS = {
+  F1: {
+    label: 'F1 – Kết luận rủi ro ẩn',
+    field: 'f1_kl',
+    options: [
+      {val:'Không phát hiện rủi ro ẩn đáng kể', cls:'bar-green', short:'Không có rủi ro'},
+      {val:'Cần làm rõ thêm một số điểm', cls:'bar-orange', short:'Cần làm rõ'},
+      {val:'Phát hiện rủi ro ẩn — cần phân tích sâu', cls:'bar-red', short:'Có rủi ro ẩn'},
+      {val:'Không đủ cơ sở tiếp tục', cls:'bar-gray', short:'Không đủ cơ sở'},
+    ]
+  },
+  F2: {
+    label: 'F2 – Kết luận năng lực tài chính',
+    field: 'b4_kl',
+    options: [
+      {val:'Đủ năng lực', cls:'bar-green', short:'Đủ năng lực'},
+      {val:'Đủ – có điều kiện', cls:'bar-orange', short:'Đủ – có điều kiện'},
+      {val:'Không đủ năng lực', cls:'bar-red', short:'Không đủ năng lực'},
+    ]
+  },
+  F3: {
+    label: 'F3 – Phán quyết',
+    field: 'phanquyet',
+    options: [
+      {val:'Cấp tín dụng', cls:'bar-green', short:'Cấp'},
+      {val:'Cấp tín dụng có điều kiện', cls:'bar-orange', short:'Cấp có điều kiện'},
+      {val:'Từ chối', cls:'bar-red', short:'Từ chối'},
+    ]
+  },
+  F2_B2: {
+    label: 'F2 – Kết luận Bước 2 (Bền vững)',
+    field: 'b2_kl',
+    options: [
+      {val:'Nguồn trả nợ mạnh và đáng tin cậy', cls:'bar-green', short:'Mạnh & tin cậy'},
+      {val:'Chấp nhận được, cần kiểm soát', cls:'bar-orange', short:'Cần kiểm soát'},
+      {val:'Tồn tại rủi ro trọng yếu', cls:'bar-red', short:'Rủi ro trọng yếu'},
+      {val:'Chưa đủ cơ sở phê duyệt', cls:'bar-gray', short:'Không đủ cơ sở'},
+    ]
+  },
+};
+
+let allData = [];
+
+async function fetchData() {
+  try {
+    const res = await fetch(SHEET_API + '?action=getAll&t=' + Date.now());
+    const json = await res.json();
+    allData = json.data || [];
+  } catch(e) {
+    // Dùng mock data nếu chưa cấu hình
+    allData = getMockData();
+  }
+  renderAll();
+  document.getElementById('lastRefresh').textContent = new Date().toLocaleTimeString('vi-VN');
+}
+
+function getTotalStudents() {
+  return parseInt(document.getElementById('totalStudents').value) || 20;
+}
+
+function renderAll() {
+  const total = getTotalStudents();
+  document.getElementById('totalExpected').textContent = total * 4;
+
+  // Count per F
+  const counts = {F1:0, F2:0, F3:0, F4:0};
+  allData.forEach(r => { if (counts[r.framework] !== undefined) counts[r.framework]++; });
+
+  const totalSub = counts.F1 + counts.F2 + counts.F3 + counts.F4;
+  document.getElementById('totalSubmitted').innerHTML = totalSub + ' <span>/ <span id="totalExpected">'+(total*4)+'</span></span>';
+  document.getElementById('totalBar').style.width = Math.min(100, totalSub / (total*4) * 100) + '%';
+
+  ['F1','F2','F3','F4'].forEach(f => {
+    const pct = Math.min(100, counts[f] / total * 100);
+    document.getElementById(f.toLowerCase()+'Count').textContent = counts[f] + '/' + total;
+    document.getElementById(f.toLowerCase()+'Bar').style.width = pct + '%';
+  });
+
+  renderKL(total);
+  renderHeatmap();
+  renderParticipants(total);
+}
+
+function renderKL(total) {
+  const grid = document.getElementById('klGrid');
+  let html = '';
+  Object.values(KL_CONFIGS).forEach(cfg => {
+    const fRows = allData.filter(r => {
+      if (cfg.field === 'b2_kl' || cfg.field === 'b4_kl') return r.framework === 'F2';
+      if (cfg.field === 'phanquyet') return r.framework === 'F3';
+      if (cfg.field === 'f1_kl') return r.framework === 'F1';
+      return false;
+    });
+    const n = fRows.length;
+    html += `<div class="kl-card"><div class="kl-title">${cfg.label}</div>`;
+    cfg.options.forEach(opt => {
+      const cnt = fRows.filter(r => r[cfg.field] === opt.val).length;
+      const pct = n > 0 ? Math.round(cnt/n*100) : 0;
+      html += `<div class="kl-row">
+        <span class="kl-label">${opt.short}</span>
+        <div class="kl-bar-bg"><div class="kl-bar ${opt.cls}" style="width:${pct}%"></div></div>
+        <span class="kl-count" style="color:${pct>50?'#EF4444':pct>25?'#F47920':'#16A34A'}">${cnt}</span>
+      </div>`;
+    });
+    if (n === 0) html += `<div style="color:rgba(255,255,255,.3);font-size:8pt;margin-top:8px;">Chưa có dữ liệu</div>`;
+    html += '</div>';
+  });
+  grid.innerHTML = html;
+}
+
+function renderHeatmap() {
+  const f1Data = allData.filter(r => r.framework === 'F1');
+  const n = f1Data.length;
+  if (n === 0) {
+    document.getElementById('heatmapBody').innerHTML = '<tr><td colspan="4" class="no-data">Chưa có dữ liệu F1...</td></tr>';
+    return;
+  }
+  const rows = F1_QUESTIONS.map(q => {
+    const coCnt = f1Data.filter(r => r[q.key] === 'Có').length;
+    const pct = Math.round(coCnt / n * 100);
+    const cls = pct >= 60 ? 'pct-high' : pct >= 30 ? 'pct-mid' : 'pct-low';
+    const barCls = pct >= 60 ? 'bar-red' : pct >= 30 ? 'bar-orange' : 'bar-green';
+    return {q, coCnt, pct, cls, barCls};
+  }).sort((a,b) => b.pct - a.pct);
+
+  document.getElementById('heatmapBody').innerHTML = rows.map((r,i) => `
+    <tr>
+      <td style="color:rgba(255,255,255,.4);font-size:8pt;">${i+1}</td>
+      <td class="hm-q">${r.q.label}</td>
+      <td class="hm-pct ${r.cls}">${r.pct}%</td>
+      <td><div class="hm-bar-bg"><div class="hm-bar ${r.barCls}" style="width:${r.pct}%"></div></div></td>
+    </tr>`).join('');
+}
+
+function renderParticipants(total) {
+  // Nhóm theo học viên
+  const byUser = {};
+  allData.forEach(r => {
+    const key = r.hoten + '|' + r.manv;
+    if (!byUser[key]) byUser[key] = {hoten:r.hoten, manv:r.manv, chinhanh:r.chinhanh, submitted:{}, lastTime:r.timestamp};
+    byUser[key].submitted[r.framework] = true;
+    byUser[key].lastTime = r.timestamp;
+  });
+
+  const users = Object.values(byUser).sort((a,b) => a.hoten.localeCompare(b.hoten, 'vi'));
+
+  if (users.length === 0) {
+    document.getElementById('partBody').innerHTML = '<tr><td colspan="8" class="no-data">Chưa có học viên nộp bài...</td></tr>';
+    return;
+  }
+
+  document.getElementById('partBody').innerHTML = users.map(u => {
+    const doneCount = ['F1','F2','F3','F4'].filter(f => u.submitted[f]).length;
+    const dotCls = doneCount === 4 ? 'dot-done' : doneCount > 0 ? 'dot-part' : 'dot-none';
+    const statusLabel = doneCount === 4 ? 'Đủ 4F' : doneCount + '/4 F';
+    return `<tr>
+      <td><span class="status-dot"><span class="${dotCls}"></span>${u.hoten}</span></td>
+      <td style="color:rgba(255,255,255,.5);">${u.manv || '—'}</td>
+      <td style="color:rgba(255,255,255,.6);">${u.chinhanh || '—'}</td>
+      ${['F1','F2','F3','F4'].map(f => `<td><span class="f-badge ${u.submitted[f]?'fb-done':'fb-none'}">${u.submitted[f]?'✓':'–'}</span></td>`).join('')}
+      <td style="color:rgba(255,255,255,.4);font-size:8pt;">${u.lastTime || '—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── MOCK DATA (demo khi chưa có Google Sheets) ──
+function getMockData() {
+  return [
+    {framework:'F1',hoten:'Nguyễn Văn An',manv:'VIB001',chinhanh:'HCM – Lê Lợi',f1_kl:'Phát hiện rủi ro ẩn — cần phân tích sâu',c1q1:'Có',c1q2:'Không',c2q3:'Có',c2q4:'Có',c3q5:'Có',c3q6:'Không',c4q7:'Có',c5q8:'Không',timestamp:'08:32'},
+    {framework:'F1',hoten:'Trần Thị Bích',manv:'VIB002',chinhanh:'HCM – Nguyễn Trãi',f1_kl:'Cần làm rõ thêm một số điểm',c1q1:'Không',c1q2:'Có',c2q3:'Có',c2q4:'Không',c3q5:'Có',c3q6:'Có',c4q7:'Không',c5q8:'Có',timestamp:'08:45'},
+    {framework:'F1',hoten:'Lê Minh Cường',manv:'VIB003',chinhanh:'HN – Hoàn Kiếm',f1_kl:'Không phát hiện rủi ro ẩn đáng kể',c1q1:'Không',c1q2:'Không',c2q3:'Có',c2q4:'Không',c3q5:'Có',c3q6:'Không',c4q7:'Có',c5q8:'Không',timestamp:'09:01'},
+    {framework:'F2',hoten:'Nguyễn Văn An',manv:'VIB001',chinhanh:'HCM – Lê Lợi',b4_kl:'Đủ – có điều kiện',b2_kl:'Chấp nhận được, cần kiểm soát',timestamp:'09:15'},
+    {framework:'F2',hoten:'Trần Thị Bích',manv:'VIB002',chinhanh:'HCM – Nguyễn Trãi',b4_kl:'Đủ năng lực',b2_kl:'Nguồn trả nợ mạnh và đáng tin cậy',timestamp:'09:22'},
+    {framework:'F3',hoten:'Nguyễn Văn An',manv:'VIB001',chinhanh:'HCM – Lê Lợi',phanquyet:'Cấp tín dụng có điều kiện',timestamp:'10:05'},
+    {framework:'F4',hoten:'Lê Minh Cường',manv:'VIB003',chinhanh:'HN – Hoàn Kiếm',timestamp:'10:30'},
+  ];
+}
+
+// ── INIT ──
+fetchData();
+setInterval(fetchData, 30000); // Refresh mỗi 30 giây
+</script>
+</body>
+</html>

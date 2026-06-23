@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bộ 4 Framework · A&A Workshop Q2/2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --B:#003087; --Bm:#1B5BB4; --O:#F47920; --Od:#D4600A; --R:#C0392B;
+  --T:#1A1A2E; --G:#6B7280; --Gb:#D1D9E6; --Bb:#B8C9E0;
+  --Bl:#EBF0FA; --Bp:#F5F8FF; --Gl:#F9FAFB;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Be Vietnam Pro',sans-serif;background:#EEF2FA;color:var(--T);min-height:100vh;}
+
+/* ── TOP BAR ── */
+.topbar{background:linear-gradient(135deg,#001D5C,var(--B),var(--Bm));padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.25);}
+.topbar-title{color:#fff;font-size:11pt;font-weight:800;letter-spacing:.3px;}
+.topbar-sub{color:rgba(255,255,255,.65);font-size:7.5pt;margin-top:2px;}
+.user-badge{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:6px 14px;display:flex;align-items:center;gap:8px;cursor:pointer;}
+.user-badge-name{color:#fff;font-size:8.5pt;font-weight:700;}
+.user-badge-edit{color:rgba(255,255,255,.6);font-size:7.5pt;}
+
+/* ── USER MODAL ── */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center;}
+.modal-bg.open{display:flex;}
+.modal{background:#fff;border-radius:14px;padding:28px 32px;width:440px;max-width:95vw;box-shadow:0 8px 40px rgba(0,0,0,.18);}
+.modal h3{font-size:12pt;font-weight:800;color:var(--B);margin-bottom:6px;}
+.modal p{font-size:8.5pt;color:var(--G);margin-bottom:20px;line-height:1.6;}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+.modal-field label{display:block;font-size:7.5pt;font-weight:700;color:var(--B);text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px;}
+.modal-field input{width:100%;border:1.5px solid var(--Bb);border-radius:8px;padding:9px 12px;font-size:9.5pt;font-family:inherit;color:var(--T);}
+.modal-field input:focus{outline:none;border-color:var(--B);box-shadow:0 0 0 3px rgba(0,48,135,.08);}
+.modal-field.full{grid-column:1/-1;}
+.btn-save{width:100%;background:linear-gradient(135deg,var(--B),var(--Bm));color:#fff;font-family:inherit;font-size:10pt;font-weight:800;border:none;border-radius:10px;padding:12px;cursor:pointer;}
+.btn-save:hover{opacity:.9;}
+
+/* ── TABS ── */
+.tabs-wrap{background:#fff;border-bottom:2px solid var(--Gb);position:sticky;top:64px;z-index:90;display:flex;overflow-x:auto;}
+.tab{padding:13px 22px;font-size:9pt;font-weight:700;color:var(--G);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;display:flex;align-items:center;gap:7px;transition:color .15s;}
+.tab:hover{color:var(--B);}
+.tab.active{color:var(--B);border-bottom-color:var(--B);}
+.tab-done{width:16px;height:16px;background:#16A34A;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:8pt;flex-shrink:0;}
+.tab-num{width:22px;height:22px;background:var(--Bl);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8pt;font-weight:800;color:var(--B);flex-shrink:0;}
+.tab.active .tab-num{background:var(--B);color:#fff;}
+
+/* ── PANELS ── */
+.panel{display:none;padding:24px 20px 60px;max-width:820px;margin:0 auto;}
+.panel.active{display:block;}
+
+/* ── FW HEADER ── */
+.fw-hd{display:flex;align-items:flex-start;gap:12px;background:linear-gradient(135deg,#001D5C,var(--B),var(--Bm));border-radius:12px;padding:14px 18px;margin-bottom:16px;}
+.fw-badge{background:rgba(255,255,255,.2);color:#fff;font-size:13pt;font-weight:800;padding:6px 16px;border-radius:20px;border:1px solid rgba(255,255,255,.3);flex-shrink:0;}
+.fw-hd h2{color:#fff;font-size:12pt;font-weight:800;line-height:1.3;}
+.fw-sub{color:rgba(255,255,255,.75);font-size:7.5pt;margin-top:4px;}
+.fw-mnemonic{color:rgba(255,255,255,.6);font-size:7pt;margin-top:6px;font-style:italic;}
+
+/* ── WARN ── */
+.warn{background:#FFF8F0;border-left:3px solid var(--O);border-radius:0 6px 6px 0;padding:9px 13px;font-size:8.5pt;color:var(--T);margin-bottom:16px;line-height:1.6;}
+
+/* ── SECTION TITLE ── */
+.sec-title{font-size:8.5pt;font-weight:800;color:var(--B);text-transform:uppercase;letter-spacing:.4px;margin:16px 0 8px;padding-left:10px;border-left:3px solid var(--B);}
+
+/* ── QUESTION BLOCKS (F1) ── */
+.q-block{border:1px solid var(--Gb);border-radius:8px;overflow:hidden;margin-bottom:10px;}
+.q-cat{background:var(--Bl);padding:7px 12px;font-size:9pt;font-weight:700;color:var(--B);border-bottom:1px solid var(--Bb);display:flex;align-items:center;gap:8px;}
+.q-cat.oc{background:#FFF3EA;color:var(--Od);border-bottom-color:#F4C89A;}
+.q-cat-tag{background:var(--B);color:#fff;font-size:7.5pt;font-weight:800;padding:2px 9px;border-radius:10px;flex-shrink:0;}
+.q-cat.oc .q-cat-tag{background:var(--O);}
+.q-row{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-bottom:1px solid var(--Gb);background:#fff;}
+.q-row:last-of-type{border-bottom:none;}
+.q-row.oc-row{background:#FFFAF5;}
+.q-num{background:var(--B);color:#fff;font-weight:800;font-size:8pt;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.q-row.oc-row .q-num{background:var(--O);}
+.q-text{flex:1;font-size:9pt;line-height:1.65;color:var(--T);}
+.q-ans{display:flex;gap:14px;flex-shrink:0;padding-top:2px;}
+.q-ans label{display:flex;align-items:center;gap:5px;font-size:9pt;font-weight:600;cursor:pointer;white-space:nowrap;}
+.q-ans input[type=radio]{accent-color:var(--B);width:15px;height:15px;}
+.q-row.oc-row .q-ans input[type=radio]{accent-color:var(--O);}
+.q-other{display:flex;align-items:center;gap:8px;padding:8px 12px;border-top:1px solid var(--Gb);background:var(--Bp);}
+.q-other-label{font-size:8.5pt;font-weight:700;color:var(--G);flex-shrink:0;}
+.q-other input{flex:1;border:none;border-bottom:1px solid var(--Gb);background:transparent;font-size:9pt;font-family:inherit;padding:2px 4px;}
+.q-other input:focus{outline:none;border-bottom-color:var(--B);}
+
+/* ── CONCLUSION BLOCK ── */
+.concl-block{background:var(--Bl);border:1px solid var(--Bb);border-radius:10px;padding:14px 18px;margin-top:10px;}
+.concl-title{font-size:9pt;font-weight:800;color:var(--B);text-transform:uppercase;letter-spacing:.3px;margin-bottom:10px;}
+.concl-opts{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+.concl-opts label{display:flex;align-items:center;gap:6px;font-size:9pt;font-weight:600;cursor:pointer;background:#fff;border:1.5px solid var(--Bb);border-radius:20px;padding:6px 14px;transition:all .15s;}
+.concl-opts input[type=radio]{accent-color:var(--B);width:14px;height:14px;}
+.concl-opts label:has(input:checked){border-color:var(--B);background:var(--Bp);}
+.concl-note-label{font-size:8.5pt;font-weight:700;color:var(--B);margin-bottom:6px;}
+textarea.note-input{width:100%;border:1.5px solid var(--Bb);border-radius:8px;padding:9px 12px;font-size:9pt;font-family:inherit;color:var(--T);resize:vertical;min-height:56px;}
+textarea.note-input:focus{outline:none;border-color:var(--B);}
+
+/* ── F2 STEP ── */
+.f2-step{border:1px solid var(--Gb);border-radius:10px;overflow:hidden;margin-bottom:12px;}
+.f2-step-hd{display:flex;align-items:center;gap:10px;padding:9px 14px;}
+.f2-step-hd.s1{background:linear-gradient(90deg,#002470,var(--B));}
+.f2-step-hd.s2{background:linear-gradient(90deg,var(--B),var(--Bm));}
+.f2-step-hd.s3{background:linear-gradient(90deg,var(--Od),var(--O));}
+.f2-step-hd.s4{background:linear-gradient(90deg,#001D5C,#003087);}
+.f2-step-num{background:rgba(255,255,255,.22);color:#fff;font-weight:800;font-size:9pt;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.f2-step-name{color:#fff;font-size:10pt;font-weight:800;}
+.f2-step-q{color:rgba(255,255,255,.8);font-size:8pt;font-weight:500;margin-left:4px;}
+.f2-body{padding:12px 14px;background:#fff;}
+.f2-sub-hd{font-size:8pt;font-weight:800;color:var(--B);text-transform:uppercase;letter-spacing:.3px;margin:10px 0 6px;border-left:2px solid var(--B);padding-left:7px;}
+.f2-sub-hd:first-child{margin-top:0;}
+
+/* F2 tables */
+.f2t{width:100%;border-collapse:collapse;font-size:9pt;}
+.f2t th{background:var(--Bl);color:var(--B);font-weight:700;padding:6px 8px;border:1px solid var(--Bb);font-size:8.5pt;}
+.f2t td{padding:4px 8px;border:1px solid var(--Gb);vertical-align:middle;}
+.f2t tr:nth-child(even) td{background:var(--Bp);}
+.f2t-label{width:140px;font-weight:600;color:var(--T);}
+.f2t input[type=text]{width:100%;border:none;background:transparent;font-size:9pt;font-family:inherit;padding:2px 4px;}
+.f2t input[type=text]:focus{outline:none;background:rgba(0,48,135,.04);}
+.f2t select{border:none;background:transparent;font-size:8.5pt;font-family:inherit;color:var(--B);font-weight:700;cursor:pointer;}
+.f2t select:focus{outline:none;}
+
+/* F2 checklist */
+.f2-chk-row{display:flex;align-items:center;gap:8px;padding:6px 8px;border-bottom:1px solid var(--Gb);}
+.f2-chk-row:last-child{border-bottom:none;}
+.f2-chk-row:nth-child(even){background:var(--Bp);}
+.f2-chk-txt{flex:1;font-size:8.5pt;color:var(--T);}
+.f2-chk-row input[type=checkbox]{accent-color:var(--B);width:14px;height:14px;cursor:pointer;flex-shrink:0;}
+.f2-chk-row input[type=radio]{accent-color:var(--B);width:14px;height:14px;cursor:pointer;}
+.f2-chk-row label{font-size:8.5pt;font-weight:600;cursor:pointer;white-space:nowrap;}
+.chk-header{background:var(--Bl);font-weight:700;color:var(--B);font-size:8pt;}
+.f2-other-row{display:flex;align-items:center;gap:6px;padding:5px 8px;}
+.f2-other-row span{font-size:8.5pt;font-weight:700;color:var(--G);flex-shrink:0;}
+.f2-other-row input{flex:1;border:none;border-bottom:1px solid var(--Gb);font-size:9pt;font-family:inherit;background:transparent;padding:2px 4px;}
+.f2-other-row input:focus{outline:none;border-bottom-color:var(--B);}
+
+/* F2 two-col layout */
+.f2-2col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.f2-3col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+@media(max-width:600px){.f2-2col,.f2-3col{grid-template-columns:1fr;}}
+
+.f2-box{border:1px solid var(--Gb);border-radius:8px;overflow:hidden;}
+.f2-box-hd{background:var(--Bl);padding:5px 10px;font-size:8pt;font-weight:700;color:var(--B);border-bottom:1px solid var(--Bb);}
+
+/* F2 conclusion strip */
+.f2-kl{background:var(--Bp);border:1px solid var(--Bb);border-radius:8px;padding:10px 14px;margin-top:10px;}
+.f2-kl-label{font-size:8.5pt;font-weight:800;color:var(--B);margin-bottom:7px;}
+.f2-kl-opts{display:flex;gap:8px;flex-wrap:wrap;}
+.f2-kl-opts label{display:flex;align-items:center;gap:5px;font-size:8.5pt;font-weight:600;cursor:pointer;background:#fff;border:1.5px solid var(--Bb);border-radius:16px;padding:5px 12px;}
+.f2-kl-opts input[type=radio]{accent-color:var(--B);width:13px;height:13px;}
+.f2-kl-opts label:has(input:checked){border-color:var(--B);background:#E8EFF9;}
+
+/* F2 step 4 conclusion */
+.f2-final{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:0;}
+.f2-final-left{background:var(--Bp);border:1px solid var(--Bb);border-radius:8px;padding:10px 14px;}
+.f2-final-label{font-size:8.5pt;font-weight:800;color:var(--B);margin-bottom:8px;}
+.f2-final-opts{display:flex;flex-direction:column;gap:5px;}
+.f2-final-opts label{display:flex;align-items:center;gap:7px;font-size:9pt;font-weight:600;cursor:pointer;}
+.f2-final-opts input[type=radio]{accent-color:var(--B);width:14px;height:14px;}
+
+/* ── F3 TABLE ── */
+.f3-main-tbl{width:100%;border-collapse:collapse;font-size:9pt;}
+.f3-main-tbl th{background:linear-gradient(135deg,var(--B),var(--Bm));color:#fff;font-weight:700;padding:8px 10px;border:1px solid var(--Bm);font-size:8.5pt;}
+.f3-main-tbl td{padding:6px 8px;border:1px solid var(--Gb);vertical-align:top;}
+.f3-main-tbl .c-name{background:var(--Bl);font-weight:700;font-size:8.5pt;color:var(--B);width:110px;}
+.f3-main-tbl .c-name small{display:block;font-weight:500;color:var(--G);font-size:7.5pt;margin-top:2px;}
+.f3-main-tbl .c2-row td{background:#FFFAF5;}
+.f3-main-tbl textarea{width:100%;border:none;background:transparent;font-size:8.5pt;font-family:inherit;resize:vertical;min-height:56px;padding:2px;}
+.f3-main-tbl textarea:focus{outline:none;background:rgba(0,48,135,.03);}
+.verd-select{width:100%;border:1.5px solid var(--Bb);border-radius:6px;padding:5px 8px;font-size:8.5pt;font-family:inherit;color:var(--T);background:#fff;cursor:pointer;}
+.verd-select:focus{outline:none;border-color:var(--B);}
+
+.f3-sum-tbl{width:100%;border-collapse:collapse;font-size:9pt;margin:12px 0 8px;}
+.f3-sum-tbl td{padding:7px 10px;border:1px solid var(--Gb);}
+.f3-sum-tbl .sum-label{background:var(--Bl);font-weight:700;color:var(--B);width:200px;font-size:8.5pt;}
+.f3-sum-tbl input[type=text]{width:100%;border:none;background:transparent;font-size:9pt;font-family:inherit;}
+.f3-sum-tbl input[type=text]:focus{outline:none;}
+.f3-sum-tbl select{border:1.5px solid var(--Bb);border-radius:5px;padding:4px 8px;font-size:8.5pt;font-family:inherit;}
+
+.f3-decision{display:grid;grid-template-columns:1fr 2fr;gap:12px;margin-top:10px;}
+.f3-dec-opts{display:flex;flex-direction:column;gap:7px;}
+.f3-dec-opts label{display:flex;align-items:center;gap:9px;font-size:9.5pt;font-weight:700;cursor:pointer;padding:9px 14px;border:1.5px solid var(--Gb);border-radius:8px;background:#fff;}
+.f3-dec-opts input[type=radio]{accent-color:var(--B);width:16px;height:16px;}
+.f3-dec-opts label:has(input:checked){border-color:var(--B);background:var(--Bp);}
+
+.f3-cond-tbl{width:100%;border-collapse:collapse;font-size:9pt;margin-top:12px;}
+.f3-cond-tbl th{background:var(--Bl);color:var(--B);font-weight:700;padding:7px 10px;border:1px solid var(--Bb);font-size:8.5pt;}
+.f3-cond-tbl td{padding:5px 8px;border:1px solid var(--Gb);}
+.f3-cond-tbl textarea{width:100%;border:none;background:transparent;font-size:8.5pt;font-family:inherit;resize:none;min-height:36px;}
+.f3-cond-num{background:var(--Bl);font-weight:800;color:var(--B);width:28px;text-align:center;}
+
+/* ── F4 TABLE ── */
+.f4-sl-row{border:1px solid var(--Gb);border-radius:8px;overflow:hidden;margin-bottom:10px;}
+.f4-sl-hd{display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--Bl);border-bottom:1px solid var(--Bb);}
+.f4-sl-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:10pt;flex-shrink:0;color:#fff;}
+.n1{background:var(--R);}.n2{background:var(--Od);}.n3{background:#7B5EA7;}.n4{background:#1A7A3E;}.n5{background:var(--B);}
+.nb{background:var(--G);}
+.f4-sl-name{font-size:9.5pt;font-weight:700;color:var(--T);}
+.f4-sl-name.blank{flex:1;}
+.f4-sl-name.blank input{width:100%;border:none;border-bottom:1.5px solid var(--Bb);background:transparent;font-size:9.5pt;font-family:inherit;font-weight:700;padding:2px 4px;}
+.f4-sl-name.blank input:focus{outline:none;border-bottom-color:var(--B);}
+.f4-sl-body{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+.f4-sl-col{padding:10px 14px;border-right:1px solid var(--Gb);}
+.f4-sl-col:last-child{border-right:none;}
+.f4-col-label{font-size:8pt;font-weight:700;color:var(--B);text-transform:uppercase;letter-spacing:.3px;margin-bottom:7px;}
+.f4-item{font-size:8.5pt;color:var(--T);padding:3px 0;border-bottom:1px solid var(--Gl);line-height:1.5;}
+.f4-item:last-child{border-bottom:none;}
+.f4-item.blank input{width:100%;border:none;border-bottom:1px solid var(--Gb);background:transparent;font-size:8.5pt;font-family:inherit;padding:2px 0;}
+.f4-item.blank input:focus{outline:none;border-bottom-color:var(--B);}
+
+.f4-selfcheck{background:var(--Bl);border:1px solid var(--Bb);border-radius:10px;padding:14px 16px;margin-top:12px;}
+.f4-sc-title{font-size:9pt;font-weight:800;color:var(--B);text-transform:uppercase;letter-spacing:.3px;margin-bottom:10px;}
+.f4-sc-item{display:flex;align-items:flex-start;gap:10px;padding:6px 0;border-bottom:1px solid var(--Gb);}
+.f4-sc-item:last-child{border-bottom:none;}
+.f4-sc-item input[type=checkbox]{accent-color:var(--B);width:16px;height:16px;margin-top:2px;flex-shrink:0;}
+.f4-sc-item span{font-size:9pt;line-height:1.6;}
+.f4-sc-item.blank{flex-direction:column;gap:3px;}
+.f4-sc-item.blank input[type=text]{width:100%;border:none;border-bottom:1px solid var(--Gb);background:transparent;font-size:9pt;font-family:inherit;padding:2px 4px;}
+
+/* ── SUBMIT BUTTON ── */
+.submit-wrap{text-align:center;margin-top:24px;}
+.btn-submit{background:linear-gradient(135deg,var(--B),var(--Bm));color:#fff;font-family:inherit;font-size:11pt;font-weight:800;border:none;border-radius:12px;padding:14px 52px;cursor:pointer;box-shadow:0 4px 18px rgba(0,48,135,.25);transition:transform .15s,box-shadow .15s;}
+.btn-submit:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,48,135,.3);}
+.btn-submit:disabled{background:#aaa;box-shadow:none;cursor:not-allowed;}
+
+/* ── TOAST ── */
+#toast{display:none;position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#1A1A2E;color:#fff;font-size:9.5pt;font-weight:600;padding:12px 30px;border-radius:30px;box-shadow:0 4px 20px rgba(0,0,0,.25);z-index:999;white-space:nowrap;}
+#toast.success{background:#0A7A3E;}
+#toast.error{background:#C0392B;}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div>
+    <div class="topbar-title">Bộ 4 Framework · A&A Workshop Q2/2026</div>
+    <div class="topbar-sub">Điền thông tin cá nhân một lần · Làm từng F theo case được giao</div>
+  </div>
+  <div class="user-badge" onclick="openModal()">
+    <div>
+      <div class="user-badge-name" id="badgeName">Chưa điền tên ▾</div>
+      <div class="user-badge-edit">Nhấn để chỉnh sửa</div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL THÔNG TIN HỌC VIÊN -->
+<div class="modal-bg" id="modalBg" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <h3>Thông tin học viên</h3>
+    <p>Điền một lần — thông tin này sẽ tự đính kèm vào tất cả bài nộp của bạn.</p>
+    <div class="modal-grid">
+      <div class="modal-field full">
+        <label>Họ và tên *</label>
+        <input type="text" id="inp_hoten" placeholder="Nguyễn Văn A" required>
+      </div>
+      <div class="modal-field">
+        <label>Mã nhân viên *</label>
+        <input type="text" id="inp_manv" placeholder="VIB12345">
+      </div>
+      <div class="modal-field">
+        <label>Chi nhánh *</label>
+        <input type="text" id="inp_chinhanh" placeholder="HCM – Nguyễn Trãi">
+      </div>
+    </div>
+    <button class="btn-save" onclick="saveUser()">Lưu thông tin</button>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs-wrap">
+  <div class="tab active" onclick="switchTab(1)" id="tab1">
+    <div class="tab-num" id="tab1-num">1</div>
+    F1 – Nhận diện rủi ro ẩn
+  </div>
+  <div class="tab" onclick="switchTab(2)" id="tab2">
+    <div class="tab-num" id="tab2-num">2</div>
+    F2 – Năng lực tài chính
+  </div>
+  <div class="tab" onclick="switchTab(3)" id="tab3">
+    <div class="tab-num" id="tab3-num">3</div>
+    F3 – Khung phán quyết
+  </div>
+  <div class="tab" onclick="switchTab(4)" id="tab4">
+    <div class="tab-num" id="tab4-num">4</div>
+    F4 – Sai lầm điển hình
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PANEL F1
+══════════════════════════════════════════════ -->
+<div class="panel active" id="panel1">
+  <div class="fw-hd">
+    <div class="fw-badge">F1</div>
+    <div>
+      <h2>Nhận diện rủi ro ẩn · Hidden Risk Identification</h2>
+      <div class="fw-sub">Phương pháp 5C++ | Dùng cho: Mọi hồ sơ trước khi ra quyết định | Đặc biệt: Hồ sơ "đẹp trên giấy"</div>
+      <div class="fw-mnemonic">💡 Câu nào khó trả lời nhất — đó chính là rủi ro cần tập trung nhất</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+    <div class="modal-field"><label>Tên hồ sơ / Case</label><input type="text" id="f1_hoSo" placeholder="KH ABC – Vay mua xe..."></div>
+    <div class="modal-field"><label>Ngày điền</label><input type="date" id="f1_ngay"></div>
+  </div>
+
+  <div class="warn">Bộ câu hỏi này dùng để <strong>phát hiện rủi ro ẩn</strong>. Câu nào khó trả lời nhất — đó là rủi ro cần tập trung nhất.</div>
+
+  <form id="f1Form">
+    <!-- C1 -->
+    <div class="q-block">
+      <div class="q-cat"><span class="q-cat-tag">C1</span> Character: Tư cách và uy tín KH</div>
+      <div class="q-row">
+        <div class="q-num">1</div>
+        <div class="q-text">Lịch sử tín dụng và hành vi tài chính của khách hàng có xuất hiện dấu hiệu bất thường hoặc suy giảm chất lượng trong 12 tháng gần nhất không?</div>
+        <div class="q-ans"><label><input type="radio" name="c1q1" value="Có" required> Có</label><label><input type="radio" name="c1q1" value="Không"> Không</label></div>
+      </div>
+      <div class="q-row">
+        <div class="q-num">2</div>
+        <div class="q-text">Có điểm nào trong hồ sơ, thông tin hoặc cách giải trình của khách hàng chưa thực sự hợp lý, nhất quán hoặc thuyết phục không?</div>
+        <div class="q-ans"><label><input type="radio" name="c1q2" value="Có" required> Có</label><label><input type="radio" name="c1q2" value="Không"> Không</label></div>
+      </div>
+      <div class="q-other"><span class="q-other-label">Khác:</span><input type="text" name="c1_khac" placeholder="Ghi chú..."></div>
+    </div>
+    <!-- C2 -->
+    <div class="q-block">
+      <div class="q-cat"><span class="q-cat-tag">C2</span> Capacity: Năng lực tài chính</div>
+      <div class="q-row">
+        <div class="q-num">3</div>
+        <div class="q-text">Nguồn trả nợ chính của khách hàng có được xác định rõ ràng và xác minh được không?</div>
+        <div class="q-ans"><label><input type="radio" name="c2q3" value="Có" required> Có</label><label><input type="radio" name="c2q3" value="Không"> Không</label></div>
+      </div>
+      <div class="q-row">
+        <div class="q-num">4</div>
+        <div class="q-text">Nguồn trả nợ có đang phụ thuộc quá lớn vào một nguồn thu, một khách hàng, một đối tác hoặc một điều kiện kinh doanh cụ thể không?</div>
+        <div class="q-ans"><label><input type="radio" name="c2q4" value="Có" required> Có</label><label><input type="radio" name="c2q4" value="Không"> Không</label></div>
+      </div>
+      <div class="q-other"><span class="q-other-label">Khác:</span><input type="text" name="c2_khac" placeholder="Ghi chú..."></div>
+    </div>
+    <!-- C3 -->
+    <div class="q-block">
+      <div class="q-cat"><span class="q-cat-tag">C3</span> Capital: Mục đích / Phương án / Vốn đối ứng</div>
+      <div class="q-row">
+        <div class="q-num">5</div>
+        <div class="q-text">Mục đích vay vốn có phù hợp với hoạt động, nhu cầu thực tế và khả năng tài chính của khách hàng không?</div>
+        <div class="q-ans"><label><input type="radio" name="c3q5" value="Có" required> Có</label><label><input type="radio" name="c3q5" value="Không"> Không</label></div>
+      </div>
+      <div class="q-row">
+        <div class="q-num">6</div>
+        <div class="q-text">Có dấu hiệu nào cho thấy mục đích sử dụng vốn thực tế có thể khác với mục đích khách hàng đề xuất không?</div>
+        <div class="q-ans"><label><input type="radio" name="c3q6" value="Có" required> Có</label><label><input type="radio" name="c3q6" value="Không"> Không</label></div>
+      </div>
+      <div class="q-other"><span class="q-other-label">Khác:</span><input type="text" name="c3_khac" placeholder="Ghi chú..."></div>
+    </div>
+    <!-- C4 -->
+    <div class="q-block">
+      <div class="q-cat oc"><span class="q-cat-tag">C4</span> Collateral: TSBĐ</div>
+      <div class="q-row oc-row">
+        <div class="q-num">7</div>
+        <div class="q-text">Khoản vay này đang được đánh giá dựa trên năng lực trả nợ hay đang dựa quá nhiều vào giá trị tài sản bảo đảm?</div>
+        <div class="q-ans"><label><input type="radio" name="c4q7" value="Có" required> Có</label><label><input type="radio" name="c4q7" value="Không"> Không</label></div>
+      </div>
+      <div class="q-other"><span class="q-other-label">Khác:</span><input type="text" name="c4_khac" placeholder="Ghi chú..."></div>
+    </div>
+    <!-- C5 -->
+    <div class="q-block">
+      <div class="q-cat oc"><span class="q-cat-tag">C5</span> Conditions: Điều kiện cấp tín dụng</div>
+      <div class="q-row oc-row">
+        <div class="q-num">8</div>
+        <div class="q-text">Có yếu tố bên ngoài nào đang ảnh hưởng đáng kể đến khả năng trả nợ của khách hàng nhưng chưa được phản ánh đầy đủ trong hồ sơ không?</div>
+        <div class="q-ans"><label><input type="radio" name="c5q8" value="Có" required> Có</label><label><input type="radio" name="c5q8" value="Không"> Không</label></div>
+      </div>
+      <div class="q-other"><span class="q-other-label">Khác:</span><input type="text" name="c5_khac" placeholder="Ghi chú..."></div>
+    </div>
+
+    <div class="concl-block">
+      <div class="concl-title">Kết luận F1</div>
+      <div class="concl-opts">
+        <label><input type="radio" name="f1_kl" value="Không phát hiện rủi ro ẩn đáng kể" required> Không phát hiện rủi ro ẩn đáng kể</label>
+        <label><input type="radio" name="f1_kl" value="Cần làm rõ thêm một số điểm"> Cần làm rõ thêm một số điểm</label>
+        <label><input type="radio" name="f1_kl" value="Phát hiện rủi ro ẩn — cần phân tích sâu"> Phát hiện rủi ro ẩn — cần phân tích sâu</label>
+        <label><input type="radio" name="f1_kl" value="Không đủ cơ sở tiếp tục"> Không đủ cơ sở tiếp tục</label>
+      </div>
+      <div class="concl-note-label">Rủi ro trọng tâm cần lưu ý:</div>
+      <textarea class="note-input" name="f1_ruiro" placeholder="Ghi rõ điểm mù hoặc rủi ro cần theo dõi..."></textarea>
+    </div>
+
+    <div class="submit-wrap">
+      <button type="submit" class="btn-submit" id="btnF1">Nộp bài F1</button>
+    </div>
+  </form>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PANEL F2
+══════════════════════════════════════════════ -->
+<div class="panel" id="panel2">
+  <div class="fw-hd">
+    <div class="fw-badge">F2</div>
+    <div>
+      <h2>Đánh giá năng lực tài chính thực chất · Financial Capacity Assessment</h2>
+      <div class="fw-sub">Mọi hồ sơ KHCN | Điền đủ 4 bước trước khi kết luận</div>
+      <div class="fw-mnemonic">💡 Có thật không? → Giữ được không? → Chịu được không? → Đủ không?</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+    <div class="modal-field"><label>Tên hồ sơ / Case</label><input type="text" id="f2_hoSo" placeholder="KH ABC – Vay mua xe..."></div>
+    <div class="modal-field"><label>Ngày điền</label><input type="date" id="f2_ngay"></div>
+  </div>
+
+  <form id="f2Form">
+    <!-- BƯỚC 1 -->
+    <div class="f2-step">
+      <div class="f2-step-hd s1">
+        <div class="f2-step-num">1</div>
+        <div class="f2-step-name">NĂNG LỰC TÀI CHÍNH</div>
+        <div class="f2-step-q">— Khách hàng có thực sự có năng lực tài chính không?</div>
+      </div>
+      <div class="f2-body">
+        <div class="f2-2col">
+          <div>
+            <div class="f2-sub-hd">1. Xác minh thu nhập</div>
+            <table class="f2t">
+              <thead><tr><th class="f2t-label">Chỉ tiêu</th><th>Kết quả xác minh</th></tr></thead>
+              <tbody>
+                <tr><td class="f2t-label">Thu nhập khai báo</td><td><input type="text" name="b1_tnKhaiBao" placeholder="VD: 50 triệu/tháng"></td></tr>
+                <tr><td class="f2t-label">Thu nhập xác minh được</td><td><input type="text" name="b1_tnXacMinh" placeholder=""></td></tr>
+                <tr><td class="f2t-label">Thu nhập ròng</td><td><input type="text" name="b1_tnRong" placeholder="Sau thuế / chi phí"></td></tr>
+                <tr><td class="f2t-label">Tổng nghĩa vụ nợ</td><td><input type="text" name="b1_nvNo" placeholder="Hiện tại"></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div>
+            <div class="f2-sub-hd">2. Rủi ro bền vững nguồn thu</div>
+            <div class="f2-box">
+              <div class="f2-chk-row chk-header"><span class="f2-chk-txt">Dấu hiệu rủi ro</span><span style="font-size:8pt;color:var(--T);font-weight:700;">Có/Không</span></div>
+              <div class="f2-chk-row"><span class="f2-chk-txt">Phụ thuộc &gt;80% một nguồn / khách hàng duy nhất</span><div style="display:flex;gap:8px;"><label><input type="radio" name="b1_rv1" value="Có"> Có</label><label><input type="radio" name="b1_rv1" value="Không"> Không</label></div></div>
+              <div class="f2-chk-row"><span class="f2-chk-txt">Thu nhập biến động &gt;30% trong 12 tháng qua</span><div style="display:flex;gap:8px;"><label><input type="radio" name="b1_rv2" value="Có"> Có</label><label><input type="radio" name="b1_rv2" value="Không"> Không</label></div></div>
+              <div class="f2-chk-row"><span class="f2-chk-txt">Ngành nghề đang suy giảm hoặc rủi ro cao</span><div style="display:flex;gap:8px;"><label><input type="radio" name="b1_rv3" value="Có"> Có</label><label><input type="radio" name="b1_rv3" value="Không"> Không</label></div></div>
+              <div class="f2-other-row"><span>Khác:</span><input type="text" name="b1_rv_khac" placeholder=""></div>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:10px;">
+          <div class="f2-sub-hd">3. Tài sản tích lũy & năng lực dự phòng</div>
+          <div class="f2-2col">
+            <table class="f2t">
+              <thead><tr><th class="f2t-label">Loại tài sản</th><th>Giá trị (triệu)</th><th style="width:100px;">Đánh giá</th></tr></thead>
+              <tbody>
+                <tr><td class="f2t-label">Tiền gửi / tiết kiệm</td><td><input type="text" name="b1_ts1_val" placeholder=""></td><td><select name="b1_ts1_dg"><option value="">--</option><option>Tốt</option><option>Trung bình</option><option>Yếu</option></select></td></tr>
+                <tr><td class="f2t-label">Tài sản tài chính khác</td><td><input type="text" name="b1_ts2_val" placeholder=""></td><td><select name="b1_ts2_dg"><option value="">--</option><option>Tốt</option><option>Trung bình</option><option>Yếu</option></select></td></tr>
+                <tr><td class="f2t-label">BĐS / PTVT ngoài TSBĐ</td><td><input type="text" name="b1_ts3_val" placeholder=""></td><td><select name="b1_ts3_dg"><option value="">--</option><option>Tốt</option><option>Trung bình</option><option>Yếu</option></select></td></tr>
+              </tbody>
+            </table>
+            <div class="f2-box">
+              <div class="f2-chk-row chk-header"><span class="f2-chk-txt">Khả năng chuyển đổi thành tiền</span></div>
+              <div class="f2-chk-row"><input type="checkbox" name="b1_tslq1"><span class="f2-chk-txt">Có tài sản thanh khoản cao (tiền mặt, tiết kiệm)</span></div>
+              <div class="f2-chk-row"><input type="checkbox" name="b1_tslq2"><span class="f2-chk-txt">Tài sản có thể chuyển đổi trong &lt; 3 tháng</span></div>
+              <div class="f2-other-row"><span>Khác:</span><input type="text" name="b1_ts_khac" placeholder=""></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BƯỚC 2 -->
+    <div class="f2-step">
+      <div class="f2-step-hd s2">
+        <div class="f2-step-num">2</div>
+        <div class="f2-step-name">BỀN VỮNG</div>
+        <div class="f2-step-q">— Nguồn thu đó có bền vững không?</div>
+      </div>
+      <div class="f2-body">
+        <div class="f2-3col">
+          <div>
+            <div class="f2-sub-hd">1. Nguồn trả nợ chính</div>
+            <div class="f2-box">
+              <div class="f2-chk-row chk-header"><span class="f2-chk-txt">Tiêu chí</span><span style="font-size:8pt;font-weight:700;">Đánh giá</span></div>
+              <div class="f2-chk-row"><span class="f2-chk-txt">Rõ ràng</span><input type="checkbox" name="b2_nc1"></div>
+              <div class="f2-chk-row"><span class="f2-chk-txt">Xác minh được</span><input type="checkbox" name="b2_nc2"></div>
+              <div class="f2-chk-row"><span class="f2-chk-txt">Bền vững</span><input type="checkbox" name="b2_nc3"></div>
+              <div class="f2-chk-row"><span class="f2-chk-txt">Phụ thuộc giả định tương lai</span><input type="checkbox" name="b2_nc4"></div>
+            </div>
+          </div>
+          <div>
+            <div class="f2-sub-hd">2. Nguồn trả nợ thay thế</div>
+            <div class="f2-box">
+              <div class="f2-chk-row chk-header"><span class="f2-chk-txt">Nội dung</span><span style="font-size:8pt;font-weight:700;">Có/Không</span></div>
+              <div class="f2-chk-row"><span class="f2-chk-txt">Có nguồn trả nợ thay thế</span><div style="display:flex;gap:6px;"><label><input type="radio" name="b2_tt1" value="Có"> Có</label><label><input type="radio" name="b2_tt1" value="Không"> Không</label></div></div>
+              <div class="f2-chk-row"><span class="f2-chk-txt">Có tài sản hỗ trợ</span><div style="display:flex;gap:6px;"><label><input type="radio" name="b2_tt2" value="Có"> Có</label><label><input type="radio" name="b2_tt2" value="Không"> Không</label></div></div>
+              <div class="f2-chk-row"><span class="f2-chk-txt">Có nguồn thu bổ sung</span><div style="display:flex;gap:6px;"><label><input type="radio" name="b2_tt3" value="Có"> Có</label><label><input type="radio" name="b2_tt3" value="Không"> Không</label></div></div>
+            </div>
+          </div>
+          <div>
+            <div class="f2-sub-hd">3. Rủi ro trọng yếu</div>
+            <div class="f2-box">
+              <div class="f2-chk-row chk-header"><span class="f2-chk-txt">Loại rủi ro</span><span style="font-size:8pt;font-weight:700;">Có</span></div>
+              <div class="f2-chk-row"><span class="f2-chk-txt">Rủi ro nghề nghiệp</span><input type="checkbox" name="b2_ru1"></div>
+              <div class="f2-chk-row"><span class="f2-chk-txt">Rủi ro ngành nghề</span><input type="checkbox" name="b2_ru2"></div>
+              <div class="f2-chk-row"><span class="f2-chk-txt">Phụ thuộc KH lớn</span><input type="checkbox" name="b2_ru3"></div>
+              <div class="f2-chk-row"><span class="f2-chk-txt">Rủi ro dòng tiền</span><input type="checkbox" name="b2_ru4"></div>
+              <div class="f2-chk-row"><span class="f2-chk-txt">Rủi ro đòn bẩy tài chính</span><input type="checkbox" name="b2_ru5"></div>
+            </div>
+          </div>
+        </div>
+        <div class="f2-kl">
+          <div class="f2-kl-label">KL Bước 2:</div>
+          <div class="f2-kl-opts">
+            <label><input type="radio" name="b2_kl" value="Nguồn trả nợ mạnh và đáng tin cậy"> Nguồn trả nợ mạnh và đáng tin cậy</label>
+            <label><input type="radio" name="b2_kl" value="Chấp nhận được, cần kiểm soát"> Chấp nhận được, cần kiểm soát</label>
+            <label><input type="radio" name="b2_kl" value="Tồn tại rủi ro trọng yếu"> Tồn tại rủi ro trọng yếu</label>
+            <label><input type="radio" name="b2_kl" value="Chưa đủ cơ sở phê duyệt"> Chưa đủ cơ sở phê duyệt</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BƯỚC 3 -->
+    <div class="f2-step">
+      <div class="f2-step-hd s3">
+        <div class="f2-step-num">3</div>
+        <div class="f2-step-name">CHỐNG CHỊU</div>
+        <div class="f2-step-q">— KH có đủ khả năng chống chịu khi gặp biến cố không?</div>
+      </div>
+      <div class="f2-body">
+        <table class="f2t">
+          <thead><tr><th class="f2t-label">Kịch bản</th><th>Tính toán & Kết quả</th><th style="width:130px;">Nhận định</th></tr></thead>
+          <tbody>
+            <tr><td class="f2t-label">DSCR khoản vay đề xuất</td><td><input type="text" name="b3_dscr_calc" placeholder="Thu nhập ròng ___ ÷ Nghĩa vụ mới ___ = ___"></td><td><select name="b3_dscr_nd"><option value="">--</option><option>&gt;1.3 — An toàn</option><option>1.0–1.3 — Biên mỏng</option><option>&lt;1.0 — Không đạt</option></select></td></tr>
+            <tr><td class="f2t-label">Stress test: thu nhập giảm 30%</td><td><input type="text" name="b3_stress_calc" placeholder="___ × 70% ÷ ___ = ___"></td><td><select name="b3_stress_nd"><option value="">--</option><option>Mạnh</option><option>Trung bình</option><option>Yếu</option></select></td></tr>
+            <tr><td class="f2t-label">Dự phòng thanh toán (tháng)</td><td><input type="text" name="b3_dp_calc" placeholder="Tích lũy ___ ÷ Nghĩa vụ/tháng ___ = ___"></td><td><select name="b3_dp_nd"><option value="">--</option><option>≥6 tháng</option><option>3–6 tháng</option><option>&lt;3 tháng</option></select></td></tr>
+            <tr><td class="f2t-label">Tỷ lệ nợ / thu nhập (DTI)</td><td><input type="text" name="b3_dti_calc" placeholder="Tổng nghĩa vụ ___ ÷ Thu nhập ___ = ___%"></td><td><select name="b3_dti_nd"><option value="">--</option><option>&lt;50% — Tốt</option><option>50–80% — Chấp nhận</option><option>&gt;80% — Vượt ngưỡng</option></select></td></tr>
+          </tbody>
+        </table>
+        <div style="font-size:8pt;color:var(--G);margin-top:6px;padding:4px 6px;background:var(--Bp);border-radius:5px;">* <b>DSCR</b> = Thu nhập ròng ÷ Tổng nghĩa vụ nợ/tháng &nbsp;|&nbsp; <b>DTI</b> ngưỡng tối đa 80% theo quy định VIB</div>
+      </div>
+    </div>
+
+    <!-- BƯỚC 4 -->
+    <div class="f2-step">
+      <div class="f2-step-hd s4">
+        <div class="f2-step-num">4</div>
+        <div class="f2-step-name">KHẢ NĂNG TRẢ NỢ</div>
+        <div class="f2-step-q">— KH có thực sự đủ năng lực để trả khoản vay đề xuất không?</div>
+      </div>
+      <div class="f2-body">
+        <div class="f2-final">
+          <div class="f2-final-left">
+            <div class="f2-final-label">KẾT LUẬN NĂNG LỰC TÀI CHÍNH:</div>
+            <div class="f2-final-opts">
+              <label><input type="radio" name="b4_kl" value="Đủ năng lực"> ✅ Đủ năng lực</label>
+              <label><input type="radio" name="b4_kl" value="Đủ – có điều kiện"> ⚠️ Đủ – có điều kiện</label>
+              <label><input type="radio" name="b4_kl" value="Không đủ năng lực"> ❌ Không đủ năng lực</label>
+            </div>
+          </div>
+          <div>
+            <div class="f2-final-label">Lưu ý / Điều kiện bổ sung:</div>
+            <textarea class="note-input" name="b4_luuy" placeholder="Ghi rõ điều kiện kiểm soát hoặc lưu ý..." style="min-height:72px;"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="submit-wrap">
+      <button type="submit" class="btn-submit" id="btnF2">Nộp bài F2</button>
+    </div>
+  </form>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PANEL F3
+══════════════════════════════════════════════ -->
+<div class="panel" id="panel3">
+  <div class="fw-hd">
+    <div class="fw-badge">F3</div>
+    <div>
+      <h2>Khung lập luận phán quyết tín dụng · Credit Judgment Framework</h2>
+      <div class="fw-sub">Dùng cho: CGPD · Logic: Điểm mạnh – Điểm yếu – Rủi ro trọng yếu – Khả năng kiểm soát – Phán quyết</div>
+      <div class="fw-mnemonic">💡 Không phán quyết từ cảm tính — 5C nói gì, ma trận nói gì, rồi mới kết luận</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+    <div class="modal-field"><label>Tên hồ sơ / Case</label><input type="text" id="f3_hoSo" placeholder="KH ABC..."></div>
+    <div class="modal-field"><label>Ngày điền</label><input type="date" id="f3_ngay"></div>
+  </div>
+
+  <form id="f3Form">
+    <table class="f3-main-tbl" style="margin-bottom:10px;">
+      <thead>
+        <tr><th style="width:120px;">Cấu phần</th><th>Điểm mạnh</th><th>Điểm yếu / Rủi ro</th><th style="width:160px;">Nhận định</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="c-name">C1 – Character<small>Tư cách và uy tín KH</small></td>
+          <td><textarea name="c1_plus" placeholder="Lịch sử trả nợ tốt, không quá hạn&#10;Hợp tác, thông tin minh bạch&#10;Quan hệ tín dụng tích cực"></textarea></td>
+          <td><textarea name="c1_minus" placeholder="Quá hạn ngắn lặp lại 3–7 ngày&#10;Giải trình không nhất quán&#10;Dấu hiệu né tránh thông tin"></textarea></td>
+          <td><select class="verd-select" name="c1_verd"><option value="">-- Chọn nhận định --</option><option>Tốt</option><option>Chấp nhận được</option><option>Đáng lo ngại</option></select></td>
+        </tr>
+        <tr class="c2-row">
+          <td class="c-name">C2 – Capacity<small>Năng lực tài chính ★ Trọng yếu nhất</small></td>
+          <td><textarea name="c2_plus" placeholder="Nguồn thu rõ, xác minh được&#10;DSCR an toàn, có vùng đệm&#10;Nhiều nguồn thu độc lập"></textarea></td>
+          <td><textarea name="c2_minus" placeholder="Phụ thuộc 1 nguồn thu duy nhất&#10;DSCR biên mỏng / xu hướng giảm&#10;Chống chịu yếu khi stress"></textarea></td>
+          <td><select class="verd-select" name="c2_verd"><option value="">-- Chọn nhận định --</option><option>Tốt</option><option>Biên mỏng</option><option>Không đủ</option></select></td>
+        </tr>
+        <tr>
+          <td class="c-name">C3 – Capital<small>Mục đích / Phương án / Vốn đối ứng</small></td>
+          <td><textarea name="c3_plus" placeholder="Vốn tự có rõ, tham gia phương án&#10;Tài sản tích lũy tốt&#10;Đòn bẩy ở mức kiểm soát"></textarea></td>
+          <td><textarea name="c3_minus" placeholder="Vốn tự có thấp / không tham gia&#10;Tài sản tích lũy không tương xứng&#10;Đòn bẩy cao, không có vùng đệm"></textarea></td>
+          <td><select class="verd-select" name="c3_verd"><option value="">-- Chọn nhận định --</option><option>Mạnh</option><option>Trung bình</option><option>Yếu</option></select></td>
+        </tr>
+        <tr>
+          <td class="c-name">C4 – Collateral<small>TSBĐ</small></td>
+          <td><textarea name="c4_plus" placeholder="Pháp lý tốt · LTV an toàn&#10;Tài sản thanh khoản cao&#10;Giá trị có vùng đệm vs. dư nợ"></textarea></td>
+          <td><textarea name="c4_minus" placeholder="TSBĐ khó thanh khoản&#10;Giá trị nhạy cảm thị trường&#10;Khoản vay dựa quá nhiều vào TSBĐ"></textarea></td>
+          <td><select class="verd-select" name="c4_verd"><option value="">-- Chọn nhận định --</option><option>Tốt</option><option>Có điều kiện</option><option>Không đủ an tâm</option></select></td>
+        </tr>
+        <tr>
+          <td class="c-name">C5 – Conditions<small>Điều kiện cấp tín dụng</small></td>
+          <td><textarea name="c5_plus" placeholder="Mục đích vay rõ, phù hợp thực tế&#10;Ngành nghề ổn định&#10;Chu kỳ thu tiền khớp lịch trả nợ"></textarea></td>
+          <td><textarea name="c5_minus" placeholder="Mục đích vay chưa thuyết phục&#10;Ngành đang suy giảm / thu hẹp&#10;Phụ thuộc kỳ vọng thị trường"></textarea></td>
+          <td><select class="verd-select" name="c5_verd"><option value="">-- Chọn nhận định --</option><option>Thuận lợi</option><option>Trung tính</option><option>Bất lợi</option></select></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="sec-title">Tổng hợp phán quyết</div>
+    <table class="f3-sum-tbl">
+      <tr><td class="sum-label">Điểm mạnh quyết định</td><td><input type="text" name="sum_manh" placeholder=""></td></tr>
+      <tr><td class="sum-label">Rủi ro trọng yếu nhất</td><td><input type="text" name="sum_ruiro" placeholder=""></td></tr>
+      <tr><td class="sum-label">Điều kiện kiểm soát bắt buộc</td><td><input type="text" name="sum_dk" placeholder=""></td></tr>
+      <tr><td class="sum-label">Rủi ro còn lại sau kiểm soát</td><td><select name="sum_rr_conlai"><option value="">-- Chọn --</option><option>Thấp</option><option>Trung bình</option><option>Cao</option></select></td></tr>
+      <tr><td class="sum-label">Chất lượng tín dụng khoản vay</td><td><select name="sum_cl"><option value="">-- Chọn --</option><option>Tốt</option><option>Chấp nhận được</option><option>Biên mỏng</option><option>Không đạt</option></select></td></tr>
+    </table>
+
+    <div class="sec-title">Phán quyết</div>
+    <div class="f3-decision">
+      <div class="f3-dec-opts">
+        <label><input type="radio" name="phanquyet" value="Cấp tín dụng" required> ✅ Cấp tín dụng</label>
+        <label><input type="radio" name="phanquyet" value="Cấp tín dụng có điều kiện"> ⚠️ Cấp tín dụng có điều kiện</label>
+        <label><input type="radio" name="phanquyet" value="Từ chối"> ❌ Từ chối</label>
+      </div>
+      <div>
+        <div class="concl-note-label" style="margin-bottom:6px;">Lý do quyết định:</div>
+        <textarea class="note-input" name="ly_do" placeholder="Ghi rõ lý do..." style="min-height:76px;"></textarea>
+      </div>
+    </div>
+
+    <div class="sec-title">Điều kiện bắt buộc (nếu cấp có điều kiện)</div>
+    <table class="f3-cond-tbl">
+      <thead><tr><th>#</th><th>Điều kiện bắt buộc</th><th style="width:160px;">Rủi ro cần kiểm soát</th><th style="width:160px;">Cách kiểm soát</th></tr></thead>
+      <tbody>
+        <tr><td class="f3-cond-num">1</td><td><textarea name="dk1_nd"></textarea></td><td><textarea name="dk1_rr"></textarea></td><td><textarea name="dk1_ks"></textarea></td></tr>
+        <tr><td class="f3-cond-num">2</td><td><textarea name="dk2_nd"></textarea></td><td><textarea name="dk2_rr"></textarea></td><td><textarea name="dk2_ks"></textarea></td></tr>
+        <tr><td class="f3-cond-num">3</td><td><textarea name="dk3_nd"></textarea></td><td><textarea name="dk3_rr"></textarea></td><td><textarea name="dk3_ks"></textarea></td></tr>
+      </tbody>
+    </table>
+
+    <div class="submit-wrap">
+      <button type="submit" class="btn-submit" id="btnF3">Nộp bài F3</button>
+    </div>
+  </form>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PANEL F4
+══════════════════════════════════════════════ -->
+<div class="panel" id="panel4">
+  <div class="fw-hd">
+    <div class="fw-badge">F4</div>
+    <div>
+      <h2>Các sai lầm thẩm định điển hình · Common Assessment Mistakes</h2>
+      <div class="fw-sub">Dùng để đối chiếu sau mỗi quyết định — "Mình có đang mắc sai lầm nào không?"</div>
+      <div class="fw-mnemonic">💡 Hồ sơ đẹp chưa đủ — tự hỏi mình đang bị bẫy bởi điều gì</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+    <div class="modal-field"><label>Tên hồ sơ / Case</label><input type="text" id="f4_hoSo" placeholder="KH ABC..."></div>
+    <div class="modal-field"><label>Ngày điền</label><input type="date" id="f4_ngay"></div>
+  </div>
+
+  <form id="f4Form">
+    <div class="sec-title">Các sai lầm phổ biến nhất</div>
+
+    <!-- Sai lầm 1 — cố định -->
+    <div class="f4-sl-row">
+      <div class="f4-sl-hd"><div class="f4-sl-num n1">1</div><div class="f4-sl-name">Nhầm TSBĐ với năng lực trả nợ</div></div>
+      <div class="f4-sl-body">
+        <div class="f4-sl-col">
+          <div class="f4-col-label">Tôi thấy dấu hiệu này trong hồ sơ không?</div>
+          <div style="display:flex;gap:14px;margin-bottom:10px;"><label><input type="radio" name="sl1_co" value="Có"> Có</label><label><input type="radio" name="sl1_co" value="Không"> Không</label></div>
+          <textarea class="note-input" name="sl1_ghichu" placeholder="Ghi chú cụ thể nếu có..." style="min-height:52px;"></textarea>
+        </div>
+        <div class="f4-sl-col">
+          <div class="f4-col-label">Cách tôi xử lý / tránh sai lầm này:</div>
+          <textarea class="note-input" name="sl1_xlí" placeholder="Tôi đã / sẽ làm gì để tránh..." style="min-height:80px;"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sai lầm 2 — cố định -->
+    <div class="f4-sl-row">
+      <div class="f4-sl-hd"><div class="f4-sl-num n2">2</div><div class="f4-sl-name">Ra quyết định dựa trên cảm tính / kinh nghiệm cá nhân</div></div>
+      <div class="f4-sl-body">
+        <div class="f4-sl-col">
+          <div class="f4-col-label">Tôi thấy dấu hiệu này trong hồ sơ không?</div>
+          <div style="display:flex;gap:14px;margin-bottom:10px;"><label><input type="radio" name="sl2_co" value="Có"> Có</label><label><input type="radio" name="sl2_co" value="Không"> Không</label></div>
+          <textarea class="note-input" name="sl2_ghichu" placeholder="Ghi chú cụ thể nếu có..." style="min-height:52px;"></textarea>
+        </div>
+        <div class="f4-sl-col">
+          <div class="f4-col-label">Cách tôi xử lý / tránh sai lầm này:</div>
+          <textarea class="note-input" name="sl2_xlí" placeholder="Tôi đã / sẽ làm gì để tránh..." style="min-height:80px;"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sai lầm 3,4,5 — tự điền -->
+    <div class="f4-sl-row">
+      <div class="f4-sl-hd"><div class="f4-sl-num nb">3</div><div class="f4-sl-name blank"><input type="text" name="sl3_ten" placeholder="Sai lầm số 3 — tự điền từ kinh nghiệm của bạn..."></div></div>
+      <div class="f4-sl-body">
+        <div class="f4-sl-col"><div class="f4-col-label">Biểu hiện điển hình:</div><textarea class="note-input" name="sl3_bh" style="min-height:64px;"></textarea></div>
+        <div class="f4-sl-col"><div class="f4-col-label">Hậu quả & cách tránh:</div><textarea class="note-input" name="sl3_hq" style="min-height:64px;"></textarea></div>
+      </div>
+    </div>
+    <div class="f4-sl-row">
+      <div class="f4-sl-hd"><div class="f4-sl-num nb">4</div><div class="f4-sl-name blank"><input type="text" name="sl4_ten" placeholder="Sai lầm số 4..."></div></div>
+      <div class="f4-sl-body">
+        <div class="f4-sl-col"><div class="f4-col-label">Biểu hiện điển hình:</div><textarea class="note-input" name="sl4_bh" style="min-height:64px;"></textarea></div>
+        <div class="f4-sl-col"><div class="f4-col-label">Hậu quả & cách tránh:</div><textarea class="note-input" name="sl4_hq" style="min-height:64px;"></textarea></div>
+      </div>
+    </div>
+    <div class="f4-sl-row">
+      <div class="f4-sl-hd"><div class="f4-sl-num nb">5</div><div class="f4-sl-name blank"><input type="text" name="sl5_ten" placeholder="Sai lầm số 5..."></div></div>
+      <div class="f4-sl-body">
+        <div class="f4-sl-col"><div class="f4-col-label">Biểu hiện điển hình:</div><textarea class="note-input" name="sl5_bh" style="min-height:64px;"></textarea></div>
+        <div class="f4-sl-col"><div class="f4-col-label">Hậu quả & cách tránh:</div><textarea class="note-input" name="sl5_hq" style="min-height:64px;"></textarea></div>
+      </div>
+    </div>
+
+    <div class="f4-selfcheck">
+      <div class="f4-sc-title">Tự kiểm tra trước khi ký</div>
+      <div class="f4-sc-item"><input type="checkbox" name="sc1"><span>Phần Năng lực hoàn trả trong F3 — tôi điền đầy đủ và tự tin không?</span></div>
+      <div class="f4-sc-item"><input type="checkbox" name="sc2"><span>Quyết định này dựa trên dữ liệu cụ thể — hay dựa trên cảm giác "trông ổn"?</span></div>
+      <div class="f4-sc-item"><input type="checkbox" name="sc3"><span style="font-style:italic;color:var(--G)">Khác (tự điền):</span><input type="text" name="sc3_text" placeholder="" style="margin-top:4px;width:100%;border:none;border-bottom:1.5px solid var(--Gb);font-size:9pt;font-family:inherit;background:transparent;padding:2px 4px;"></div>
+    </div>
+
+    <div class="submit-wrap">
+      <button type="submit" class="btn-submit" id="btnF4">Nộp bài F4</button>
+    </div>
+  </form>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════
+// CẤU HÌNH — thay URL sau khi deploy Apps Script
+// ═══════════════════════════════════════
+const SHEET_URL = 'https://default662ce8bb85db4ba2ba98be222318b8.3e.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/034643d2152e43dd9f9a90fddd888e7a/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=DbboLgGLqozGdtje0pKCeospX26LBnCYUfdTaDHL-zo';
+
+// ── USER INFO ──
+function loadUser() {
+  const u = JSON.parse(localStorage.getItem('aa_user') || '{}');
+  if (u.hoten) {
+    document.getElementById('badgeName').textContent = u.hoten + ' ▾';
+  } else {
+    openModal();
+  }
+  return u;
+}
+
+function openModal() {
+  const u = JSON.parse(localStorage.getItem('aa_user') || '{}');
+  document.getElementById('inp_hoten').value = u.hoten || '';
+  document.getElementById('inp_manv').value = u.manv || '';
+  document.getElementById('inp_chinhanh').value = u.chinhanh || '';
+  document.getElementById('modalBg').classList.add('open');
+}
+
+function closeModalOutside(e) {
+  if (e.target === document.getElementById('modalBg')) {
+    const u = JSON.parse(localStorage.getItem('aa_user') || '{}');
+    if (u.hoten) document.getElementById('modalBg').classList.remove('open');
+  }
+}
+
+function saveUser() {
+  const hoten = document.getElementById('inp_hoten').value.trim();
+  const manv = document.getElementById('inp_manv').value.trim();
+  const chinhanh = document.getElementById('inp_chinhanh').value.trim();
+  if (!hoten) { alert('Vui lòng nhập họ tên.'); return; }
+  const u = { hoten, manv, chinhanh };
+  localStorage.setItem('aa_user', JSON.stringify(u));
+  document.getElementById('badgeName').textContent = hoten + ' ▾';
+  document.getElementById('modalBg').classList.remove('open');
+  showToast('✅ Đã lưu thông tin: ' + hoten, 'success');
+}
+
+// ── TABS ──
+function switchTab(n) {
+  [1,2,3,4].forEach(i => {
+    document.getElementById('panel'+i).classList.toggle('active', i===n);
+    document.getElementById('tab'+i).classList.toggle('active', i===n);
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── AUTO DATE ──
+window.addEventListener('DOMContentLoaded', () => {
+  const today = new Date().toISOString().split('T')[0];
+  ['f1_ngay','f2_ngay','f3_ngay','f4_ngay'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && !el.value) el.value = today;
+  });
+  loadUser();
+});
+
+// ── TOAST ──
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = type;
+  t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, 4000);
+}
+
+// ── SUBMIT HELPER ──
+async function submitForm(formId, btnId, framework, extraData) {
+  const btn = document.getElementById(btnId);
+  const form = document.getElementById(formId);
+  const user = JSON.parse(localStorage.getItem('aa_user') || '{}');
+
+  if (!user.hoten) { openModal(); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Đang gửi...';
+
+  const rawData = Object.fromEntries(new FormData(form).entries());
+  form.querySelectorAll('input[type=checkbox]').forEach(cb => {
+    rawData[cb.name] = cb.checked ? 'true' : 'false';
+  });
+
+  const payload = {
+    timestamp: new Date().toLocaleString('vi-VN'),
+    framework: framework,
+    hoTen: user.hoten || '',
+    maNV: user.manv || '',
+    chiNhanh: user.chinhanh || '',
+    hoSo: extraData.hoSo || '',
+    ngay: extraData.ngay || '',
+    ketLuan: rawData.ketLuan || rawData.ketluan || rawData[framework.toLowerCase()+'_ketLuan'] || '',
+    ghiChu: rawData.ghiChu || rawData.ghichu || rawData[framework.toLowerCase()+'_ghiChu'] || ''
+  };
+
+  try {
+    const res = await fetch(SHEET_URL, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    showToast('✅ Nộp bài ' + framework + ' thành công!', 'success');
+    btn.textContent = '✅ Đã nộp ' + framework;
+    // Đánh dấu tab done
+    const tabNum = {F1:1,F2:2,F3:3,F4:4}[framework];
+    const numEl = document.getElementById('tab'+tabNum+'-num');
+    numEl.className = 'tab-done';
+    numEl.textContent = '✓';
+    window.scrollTo({top:0,behavior:'smooth'});
+  } catch(err) {
+    showToast('❌ Lỗi kết nối. Kiểm tra SHEET_URL.', 'error');
+    btn.disabled = false;
+    btn.textContent = 'Nộp bài ' + framework;
+  }
+}
+
+document.getElementById('f1Form').addEventListener('submit', e => {
+  e.preventDefault();
+  submitForm('f1Form','btnF1','F1',{hoSo: document.getElementById('f1_hoSo').value, ngay: document.getElementById('f1_ngay').value});
+});
+document.getElementById('f2Form').addEventListener('submit', e => {
+  e.preventDefault();
+  submitForm('f2Form','btnF2','F2',{hoSo: document.getElementById('f2_hoSo').value, ngay: document.getElementById('f2_ngay').value});
+});
+document.getElementById('f3Form').addEventListener('submit', e => {
+  e.preventDefault();
+  submitForm('f3Form','btnF3','F3',{hoSo: document.getElementById('f3_hoSo').value, ngay: document.getElementById('f3_ngay').value});
+});
+document.getElementById('f4Form').addEventListener('submit', e => {
+  e.preventDefault();
+  submitForm('f4Form','btnF4','F4',{hoSo: document.getElementById('f4_hoSo').value, ngay: document.getElementById('f4_ngay').value});
+});
+</script>
+</body>
+</html>
