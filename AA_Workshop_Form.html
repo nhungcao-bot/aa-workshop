@@ -856,12 +856,12 @@ async function submitForm(formId, btnId, framework, extraData) {
   };
 
   try {
-    const res = await fetch(SHEET_URL, {
+    await fetch(SHEET_URL, {
       method: 'POST',
-      headers: {'Content-Type':'application/json'},
+      mode: 'no-cors',
+      headers: {'Content-Type':'text/plain'},
       body: JSON.stringify(payload)
     });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
     showToast('✅ Nộp bài ' + framework + ' thành công!', 'success');
     btn.textContent = '✅ Đã nộp ' + framework;
     // Đánh dấu tab done
